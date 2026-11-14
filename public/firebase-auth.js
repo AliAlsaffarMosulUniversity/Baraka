@@ -1,0 +1,12 @@
+// Public Firebase web configuration. No administrative credentials are stored here.
+const config={apiKey:'AIzaSyD3sNbaR7ULiZRr9PW6fao2xEEVZyLHmZ0',authDomain:'baraka-b01fa.firebaseapp.com',projectId:'baraka-b01fa',storageBucket:'baraka-b01fa.firebasestorage.app',messagingSenderId:'998686885082',appId:'1:998686885082:web:9bc77ff8e982ad87d391e3'};
+let instance;
+async function sdk(){if(!instance)instance=Promise.all([import('https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js'),import('https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js')]).then(async([app,auth])=>{const a=auth.getAuth(app.initializeApp(config));auth.useDeviceLanguage(a);await a.authStateReady();return{a,...auth}}).catch(e=>{instance=null;throw e});return instance}
+export async function token(){const s=await sdk();return s.a.currentUser?await s.a.currentUser.getIdToken():null}
+export async function login(email,password){const s=await sdk();return s.signInWithEmailAndPassword(s.a,email,password)}
+export async function signup(email,password){const s=await sdk();const result=await s.createUserWithEmailAndPassword(s.a,email,password);return result}
+export async function logout(){const s=await sdk();return s.signOut(s.a)}
+export async function reset(email){const s=await sdk();return s.sendPasswordResetEmail(s.a,email)}
+export async function verify(){const s=await sdk();if(s.a.currentUser)await s.sendEmailVerification(s.a.currentUser)}
+export async function reload(){const s=await sdk();if(s.a.currentUser){await s.reload(s.a.currentUser);await s.a.currentUser.getIdToken(true)}}
+export function errorMessage(e){return({'auth/invalid-credential':'الإيميل أو كلمة المرور غير صحيحة.','auth/wrong-password':'الإيميل أو كلمة المرور غير صحيحة.','auth/user-not-found':'الإيميل أو كلمة المرور غير صحيحة.','auth/invalid-email':'أدخل إيميلاً صحيحاً.','auth/email-already-in-use':'هذا الإيميل مسجل. جرّب الدخول أو استعادة كلمة المرور.','auth/weak-password':'اختار كلمة مرور أقوى، ٨ أحرف على الأقل.','auth/too-many-requests':'محاولات كثيرة. انتظر شوي وحاول مرة ثانية.','auth/network-request-failed':'تعذر الاتصال. تأكد من الإنترنت وحاول مرة ثانية.','auth/operation-not-allowed':'التسجيل بالإيميل غير مفعّل في Firebase.','auth/unauthorized-domain':'نطاق الموقع يحتاج إضافته إلى النطاقات المسموحة في Firebase.','auth/user-disabled':'هذا الحساب معطّل.'})[e.code]||'تعذر إكمال العملية. تأكد من الاتصال وحاول مرة ثانية.'}
