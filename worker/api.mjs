@@ -13,7 +13,7 @@ export async function identity(request,env,fetcher=fetch){
   const response=await fetcher('https://identitytoolkit.googleapis.com/v1/accounts:lookup?key='+FIREBASE_KEY,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:token}),signal:AbortSignal.timeout(10000)});
   if(!response.ok)return null;
   const data=await response.json(),account=data.users?.[0];
-  if(!account||account.disabled||account.localId!==claims.sub)return null;
+  if(!account||account.disabled||account.localId!==claims.sub||claims.firebase?.sign_in_provider!=='google.com')return null;
   const email=account.email||'',verified=account.emailVerified===true;
   return{id:'firebase:'+account.localId,email,verified,provider:'firebase',admin:!!env.ADMIN_EMAIL&&verified&&email.toLowerCase()===env.ADMIN_EMAIL.toLowerCase()};
  }
